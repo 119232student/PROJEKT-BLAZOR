@@ -1,0 +1,119 @@
+﻿@page "/MyCalendar"
+
+<PageTitle>Calendar</PageTitle>
+
+<body>
+    <!-- Here we are using attributes like
+        cellspacing and cellpadding -->
+    <!-- The purpose of the cellpadding is
+        the space that a user want between
+        the border of cell and its contents-->
+    <!-- cellspacing is used to specify the
+        space between the cell and its contents -->
+    <h2 align="center" style="color: orange;">
+        <p role="status">@currentMonthName @currentYear</p>
+    </h2>
+    <br />
+
+    <table bgcolor="lightgrey" align="center" cellspacing="21" cellpadding="21">
+
+        <!-- The tr tag is used to enter
+            rows in the table -->
+        <!-- It is used to give the heading to the
+            table. We can give the heading to the
+            top and bottom of the table -->
+
+        <caption align="top">
+            <!-- Here we have used the attribute
+                that is style and we have colored
+                the sentence to make it better
+                depending on the web page-->
+        </caption>
+
+        <!-- Here th stands for the heading of the
+            table that comes in the first row-->
+        <!-- The text in this table header tag will
+            appear as bold and is center aligned-->
+
+        <thead>
+            <tr>
+                <!-- Here we have applied inline style
+                    to make it more attractive-->
+                <th>Sun</th>
+                <th>Mon</th>
+                <th>Tue</th>
+                <th>Wed</th>
+                <th>Thu</th>
+                <th>Fri</th>
+                <th>Sat</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var week in MonthCalendar)
+            {
+                <tr>
+                    @foreach (var day in week)
+                    {
+                        <td class="@GetDayClass(day)">@RenderDay(day)</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+<style>
+    .current-day {
+        background-color: #f0f0f0; /* kolor szary */
+    }
+</style>
+@code {
+    private int currentYear = DateTime.Now.Year;
+    private int currentMonth = DateTime.Now.Month;
+    private string currentMonthName => new DateTime(currentYear, currentMonth, 1).ToString("MMMM");
+
+    private int[][] MonthCalendar { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        var firstDayOfMonth = new DateTime(currentYear, currentMonth, 1);
+        var daysInMonth = DateTime.DaysInMonth(currentYear, currentMonth);
+        var firstDayOfWeek = (int)firstDayOfMonth.DayOfWeek;
+
+        MonthCalendar = new int[6][]; // Max 6 weeks in a month
+        int currentDay = 1;
+
+        for (int i = 0; i < MonthCalendar.Length; i++)
+        {
+            MonthCalendar[i] = new int[7]; // 7 days in a week
+
+            for (int j = 0; j < MonthCalendar[i].Length; j++)
+            {
+                if (i == 0 && j < firstDayOfWeek)
+                {
+                    MonthCalendar[i][j] = 0; // Placeholder for days before the first of the month
+                }
+                else if (currentDay <= daysInMonth)
+                {
+                    MonthCalendar[i][j] = currentDay++;
+                }
+                else
+                {
+                    MonthCalendar[i][j] = 0; // Placeholder for days after the last of the month
+                }
+            }
+        }
+    }
+
+    private string GetDayClass(int day)
+    {
+        return day == DateTime.Now.Day ? "current-day" : "";
+    }
+
+    private string RenderDay(int day)
+    {
+        return day == 0 ? "" : day.ToString();
+    }
+}
